@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1018">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>STRIKE / Drum Sampler</title>
 <style>
 :root{color-scheme:dark;--bg:#070b14;--panel:#0e1622;--panel2:#111d2a;--line:#26374a;--text:#e8edf3;--muted:#a0aec0;--sub:#8293a8;--accent:#d6ab76;--accent2:#e8c99f;--synth:#d6ab76;--sample:#77b9bb;--control:#172739;--hover:#26394c;--focus:#f3c78d;--red:#f28a83;--radius:10px;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;--sans:Inter,"Segoe UI",Roboto,Arial,sans-serif}
@@ -13,11 +17,12 @@
 @media(max-width:760px){.mixgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.app{padding:12px 10px 18px}.top{align-items:flex-start;gap:10px}.brand{gap:8px}.brand h1{font-size:20px}.brand p{font-size:9px}.mark{width:35px;height:35px}.topactions{gap:5px}.topactions button{font-size:11px;padding:5px 7px;min-height:34px}.transport{padding:9px;justify-content:flex-start;gap:8px 12px}.transport .group:first-child{width:100%}.transport .group:last-child{margin-left:auto}.position{margin-left:auto}.transport .field{gap:5px}.transport .group{gap:6px}.swing{width:76px}.master{width:75px}.meter{width:53px}.workspace{grid-template-columns:minmax(0,1fr);gap:10px}.pad{min-height:80px;aspect-ratio:1.1;padding:8px}.padname{font-size:13px}.panelhead{padding:10px 12px;min-height:45px}.padbody{padding:10px}.editorbody{padding:10px 12px}.control label{font-size:11px}.controls{gap:12px 9px}.controls input{height:25px}.section{margin-top:11px}.seqscroll{max-height:470px}.seqtable{padding:7px 8px 10px;grid-template-columns:137px repeat(var(--steps,16),minmax(32px,1fr));min-width:calc(137px + var(--steps,16) * 36px + 16px)}.step{height:34px}.track{height:34px}.track button.mini{height:29px}.seqfoot{padding:9px 11px}.panelhead .hint{font-size:10px}.seqhead .group{justify-content:flex-start}.status{font-size:10px}.keyboardhint{display:none}}
 @media(max-width:390px){.brand p{letter-spacing:.1em}.topactions button{font-size:10px;padding:4px 6px}.pad{min-height:73px;padding:6px}.padname{font-size:11px}.padtype{font-size:8px}.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.samplerow{grid-template-columns:repeat(3,minmax(0,1fr))}.mode button{padding:3px 8px}.meter{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+#installApp[hidden]{display:none}
 </style>
 </head>
 <body>
 <main class="app">
-<header class="top"><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 17h5l3-11 5 17 4-12 2 6h5"/></svg></div><div><h1>STRIKE<span style="color:var(--accent)">.</span></h1><p>Drum sampler / v1.0</p></div></div><div class="topactions"><button id="loadProject" class="ghost" title="Gespeichertes Projekt öffnen">Öffnen</button><button id="saveProject" class="ghost" title="Projekt inklusive Audio speichern">Speichern</button><button id="exportWav" class="primary" title="Pattern als WAV exportieren"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg>WAV</button></div></header>
+<header class="top"><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 17h5l3-11 5 17 4-12 2 6h5"/></svg></div><div><h1>STRIKE<span style="color:var(--accent)">.</span></h1><p>Drum sampler / v1.1.0</p></div></div><div class="topactions"><button id="installApp" class="ghost" hidden title="STRIKE als App installieren">Installieren</button><button id="loadProject" class="ghost" title="Gespeichertes Projekt öffnen">Öffnen</button><button id="saveProject" class="ghost" title="Projekt inklusive Audio speichern">Speichern</button><button id="exportWav" class="primary" title="Pattern als WAV exportieren"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg>WAV</button></div></header>
 <section class="transport" aria-label="Transport">
 <div class="group"><button id="play" class="primary play" aria-pressed="false"><span aria-hidden="true">▶</span> Play</button><button id="stop" title="Wiedergabe stoppen und zurücksetzen"><span aria-hidden="true">■</span> Stop</button><button id="record" class="record" aria-pressed="false" title="Live gespielte Pads quantisiert aufnehmen"><span class="dot" aria-hidden="true"></span>REC</button><span class="position" id="position" aria-label="Takt und Schlag">01.01</span></div>
 <div class="group"><div class="field"><label for="bpm">BPM</label><input type="number" id="bpm" min="40" max="240" step="1" value="120"></div><div class="vertical"></div><div class="field"><label for="swing">Swing</label><input class="swing" type="range" id="swing" min="0" max="60" value="12"><output id="swingVal" class="value">12%</output></div></div>
@@ -32,7 +37,7 @@
 <div class="section"><div class="sectionhead"><h3>Voice / Mixer</h3><div class="group"><label class="micro" for="choke">Choke</label><select id="choke" title="Pads derselben Gruppe stoppen einander"><option value="0">Aus</option><option value="1">Gruppe 1</option><option value="2">Gruppe 2</option><option value="3">Gruppe 3</option></select><button id="mute" class="mute" aria-pressed="false">M</button><button id="solo" class="solo" aria-pressed="false">S</button></div></div><div id="mixControls" class="controls mixgrid"></div></div>
 </div></section></div>
 <section class="panel sequencer" aria-labelledby="seqHeading"><div class="panelhead seqhead"><h2 id="seqHeading"><span class="eyebrow">03</span>Step Sequencer <span class="hint" id="patternLabel" style="margin-left:8px">1 Takt · 16 Steps</span></h2><div class="group"><label class="sr" for="steps">Pattern-Länge</label><select id="steps"><option value="16">16 Steps</option><option value="32">32 Steps</option></select><button id="accentMode" class="ghost" aria-pressed="false" title="Akzentmodus: Steps mit voller Anschlagstärke setzen">Akzent</button><button id="demo" class="ghost" title="Demo-Pattern laden">Demo</button><button id="clearRow" class="ghost" title="Alle Steps des ausgewählten Pads löschen (auch im zweiten Takt)">Spur leeren</button><button id="clearAll" class="ghost" title="Alle Steps beider Takte löschen">Alles leeren</button></div></div><div class="seqscroll" id="seqscroll"><div class="seqtable" id="seqtable" role="group" aria-label="Step Sequencer"></div></div><div class="seqfoot"><span>Klick: Step an/aus · Akzent-Taste, Shift- oder Rechtsklick: Akzent · REC: Live-Aufnahme</span><span id="stepCount">0 aktive Steps</span></div></section>
-<footer class="status"><span id="status" role="status"><strong>Bereit</strong> · Audio startet mit dem ersten Pad oder Play.</span><span>Web Audio API · Offline · Keine externen Ressourcen</span></footer>
+<footer class="status"><span id="status" role="status"><strong>Bereit</strong> · Audio startet mit dem ersten Pad oder Play.</span><span id="pwaStatus" role="status">Web Audio API · Keine externen Ressourcen</span></footer>
 </main><div class="toast" id="toast" role="status" hidden></div><input type="file" id="sampleFile" accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a,.aif,.aiff" hidden><input type="file" id="projectFile" accept=".json,application/json" hidden>
 <script>
 'use strict';
@@ -120,4 +125,54 @@ $('loadSample').addEventListener('click',()=>{loadTarget=state.selected;$('sampl
 $('loadProject').addEventListener('click',()=> $('projectFile').click());$('projectFile').addEventListener('change',()=>{const f=$('projectFile').files[0];if(f)openProject(f);$('projectFile').value='';});$('saveProject').addEventListener('click',saveProject);$('exportWav').addEventListener('click',exportWav);
 document.addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target.matches('input,select,textarea,[contenteditable]'))return;const i=keys.indexOf(e.key.toLowerCase());if(i>=0){e.preventDefault();trigger(i);return;}if(e.code==='Space'&&!e.target.closest('button')){e.preventDefault();playing?stop(true):start();}});
 window.addEventListener('resize',requestWave);if(window.ResizeObserver)new ResizeObserver(requestWave).observe($('wave'));document.addEventListener('visibilitychange',()=>{if(!document.hidden&&playing)tick();});
-</script></body></html>
+</script><script>
+// PWA integration is independent of the instrument and its project format.
+(() => {
+  const install = document.getElementById('installApp');
+  const status = document.getElementById('pwaStatus');
+  let promptEvent = null;
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    promptEvent = event;
+    install.hidden = false;
+  });
+  install.addEventListener('click', async () => {
+    const event = promptEvent;
+    if (!event) return;
+    promptEvent = null;
+    install.hidden = true;
+    try { await event.prompt(); await event.userChoice; }
+    catch (error) { console.warn('PWA installation:', error); }
+  });
+  window.addEventListener('appinstalled', () => {
+    promptEvent = null;
+    install.hidden = true;
+  });
+  if (!window.isSecureContext || !('serviceWorker' in navigator) || location.protocol === 'file:') {
+    status.textContent = 'Web Audio API · PWA benötigt HTTPS oder localhost';
+    return;
+  }
+  const ready = () => { status.textContent = 'Web Audio API · Offline bereit'; };
+  const update = () => { status.textContent = 'Update bereit · Nach Schließen aller App-Fenster verfügbar'; };
+  const observe = (registration, worker) => {
+    if (!worker) return;
+    const state = () => {
+      if (worker.state === 'installed' && navigator.serviceWorker.controller && registration.waiting) update();
+      if (worker.state === 'activated') ready();
+      if (worker.state === 'redundant' && !registration.active) status.textContent = 'Offline-Cache konnte nicht eingerichtet werden';
+    };
+    worker.addEventListener('statechange', state);
+    state();
+  };
+  navigator.serviceWorker.register('./sw.js', {scope:'./', updateViaCache:'none'}).then(registration => {
+    if (registration.active) ready();
+    if (registration.waiting) update();
+    observe(registration, registration.installing);
+    registration.addEventListener('updatefound', () => observe(registration, registration.installing));
+  }).catch(error => {
+    status.textContent = 'PWA nicht verfügbar · Browser-/iframe-Einstellungen prüfen';
+    console.warn('PWA registration:', error);
+  });
+})();
+</script>
+</body></html>
